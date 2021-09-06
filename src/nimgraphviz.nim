@@ -15,6 +15,18 @@
 ##    # create a directed graph
 ##    let graph = newGraph[Arrow]()
 ##
+##    # You can add subgraphs to it:
+##    let sub = newGraph(graph)
+##    # You can nest subgraphs indefinitely :
+##    # let subsub = newGraph(sub)
+##
+##    # The subgraph is automatically included in the main graph
+##    # when you export it. It can also work standalone.
+##    # Note that some layout engines behave differently when a subgraph
+##    # name begins with "cluster". Please refer to the official GraphViz
+##    # documentation for details.
+##
+##
 ##    # set some attributes of the graph:
 ##    graph["fontsize"] = "32"
 ##    graph["label"] = "Test Graph"
@@ -24,9 +36,11 @@
 ##
 ##    # add edges:
 ##    # (if a node does not exist already it will be created automatically)
-##    graph.addEdge("a"->"b" ("label", "A to B"))
+##    graph.addEdge("a"->"b", ("label", "A to B"))
 ##    graph.addEdge("c"->"b", ("style", "dotted"))
 ##    graph.addEdge("b"->"a")
+##    sub.addEdge("x"->"y")
+##
 ##    graph.addNode("c", ("color", "blue"), ("shape", "box"),
 ##                        ("style", "filled"), ("fontcolor", "white"))
 ##    graph.addNode("d", ("label", "node 'd'"))
@@ -37,40 +51,46 @@
 ##
 ##    # Export graph as PNG:
 ##    graph.exportImage("test_graph.png")
-##
-##    You can also nest subgraphs indefinitely :
-##    let sub = newSubGraph(graph)
-##    # let subsub = newSubGraph(sub)
-##    sub.addEdge("x"->"y")
-##    # The subgraph is automatically included in the main graph
-##    # when you export it. It can also work standalone.
 
 import "nimgraphviz/edges/edges.nim", "nimgraphviz/graphs/graphs.nim"
 export edges, graphs
 
 when isMainModule :
-  let main = newGraph[Edge]() # create a graph (strict, but not oriented)
-  # let main = Graph[Edge]()
-  let sub = newGraph(main) # the graph can have subgraph
-  # the subgraph can have subgraphs too!
+  # create a directed graph
+  let graph = newGraph[Arrow]()
 
-  # adding an edge, along with attributes
-  main.addEdge("a"--"b", ("label", "A to B"))
+  # You can add subgraphs to it:
+  let sub = newGraph(graph)
+  # You can nest subgraphs indefinitely :
+  # let subsub = newGraph(sub)
 
-  # attributes can also be added afterwards
-  sub.addEdge("b"--"c")
-  sub["b"--"c", "style"] = "dotted"
+  # The subgraph is automatically included in the main graph
+  # when you export it. It can also work standalone.
+  # Note that some layout engines behave differently when a subgraph
+  # name begins with "cluster". Please refer to the official GraphViz
+  # documentation for details.
 
-  # similar features are available for nodes
-  main["d", "label"] = "This node stands alone"
+  # set some attributes of the graph:
+  graph["fontsize"] = "32"
+  graph["label"] = "Test Graph"
+  # (You can also access nodes and edges attributes this way :)
+  # graph["a", "bgcolor"] = "red"
+  # graph["a"->"b", "arrowhead"] = "diamond"
 
-  # subgraphs whose name begin in "cluster" have a special meaning in DOT.
-  sub.name = "cluster_whatever"
-  sub["bgcolor"] = "grey" # hey, graph attributes can be set as well!
+  # add edges:
+  # (if a node does not exist already it will be created automatically)
+  graph.addEdge("a"->"b", ("label", "A to B"))
+  graph.addEdge("c"->"b", ("style", "dotted"))
+  graph.addEdge("b"->"a")
+  sub.addEdge("x"->"y")
+
+  graph.addNode("c", ("color", "blue"), ("shape", "box"),
+                      ("style", "filled"), ("fontcolor", "white"))
+  graph.addNode("d", ("label", "node 'd'"))
 
   # if you want to export the graph in the DOT language,
   # you can do it like this:
-  echo main.exportDot()
+  # echo graph.exportDot()
 
   # Export graph as PNG:
-  main.exportImage("test_graph.png")
+  graph.exportImage("test_graph.png")

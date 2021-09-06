@@ -11,19 +11,41 @@ export tables
 
 
 type
-
   Graph*[E: Edge or Arrow] = ref object
+    ## Represents a GraphViz graph or digraph.
+    ## Graph[Edge] makes a `strict graph`
+    ## Graph[Arrow] makes a `strict digraph`
+    ## Notation: for convenience, `Graph` refers to the (generic) nim object
+    ## whereas `graph` refers to the GraphViz structure, represented by `Graph[Edge]`
+
     name*: string
+    ## name of the graph, most often irrelevant but in subgraphs
+    ## subgraphs whose name begins with "cluster" may be given special treatment
+    ## by some of graphviz' layout engines.
+
     graphAttr*: Table[string, string]
+    ## global graph attributes
+
     nodeAttrs*: Table[string, Table[string, string]]
+    ## node attributes; only nodes that are not referenced by edges of the graph
+    ## need to referenced here in order to appear in the graph
+
     edges*: Table[E, Table[string, string]]
+    ## edges with their attributes
+
     subGraphs: seq[Graph[E]]
+    ## (private) list of subgraphs.
+    ## A digraph may only have digraphs as children;
+    ## a graph may only have graphs as children.
+    ## This attribute is kept private to warrant against graphs that include each other.
+    ## You may access the other attributes however you like;
+    ## sanity checks are run during the dot script generation phase.
 
 
 func newGraph*[E](): Graph[E] =
   ## doesn't do anything, the default initialisation procedure is enough.
   ## actual body:
-  ## result = Graph[E]()
+  ## `result = Graph[E]()`
   result = Graph[E]()
 
 func newGraph*[E](parent: Graph[E]): Graph[E] =
@@ -99,7 +121,6 @@ iterator iterEdges*[E](self: Graph[E], node: string): E =
     if edge.a == node or edge.b == node:
       yield edge
 
-
 iterator iterEdgesIn*(self: Graph[Arrow], node: string): Arrow =
   ## Oriented version: yields only inbound edges
   for edge in self.edges.keys() :
@@ -173,8 +194,7 @@ func exportDot*(self: Graph[Arrow]): string =
   ## Returns the dot script corresponding to the graph, including subgraphs.
   result = "strict digraph " & exportIdentifier(self.name) & " " & self.buildBody()
 
-proc exportImage*(self: Graph, fileName: string,
-          layout="dot", format="", exec="dot") =
+proc exportImage*(self: Graph, fileName: string, layout="dot", format="", exec="dot") =
   ## Exports the graph as an image file.
   ##
   ## ``filename`` - the name of the file to export to. Should include ".png"
