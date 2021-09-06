@@ -45,7 +45,8 @@
 ##    # The subgraph is automatically included in the main graph
 ##    # when you export it. It can also work standalone.
 
-include "nimgraphviz/edges/edges.nim", "nimgraphviz/graphs/graphs.nim"
+import "nimgraphviz/edges/edges.nim", "nimgraphviz/graphs/graphs.nim"
+export edges, graphs
 
 when isMainModule :
   let main = newGraph[Edge]() # create a graph (strict, but not oriented)
