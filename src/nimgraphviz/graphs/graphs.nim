@@ -134,11 +134,14 @@ iterator iterEdgesOut*(self: Graph[Arrow], node: string): Arrow =
 
 
 func exportIdentifier(identifier:string): string =
-  if identifier.validIdentifier() :
-    return identifier
-
-  # if needs be, escape '"' and surround in quotes (do not replace '\' !!)
-  return "\"" & identifier.replace("\"", "\\\"") & "\""
+  var ids: seq[string] = @[]
+  for id in identifier.split(":"):
+    if not id.validIdentifier():
+      # if needs be, escape '"' and surround in quotes (do not replace '\' !!)
+      ids.add("\"" & id.replace("\"", "\\\"") & "\"")
+    else:
+      ids.add(id)
+  return ids.join(":")
 
 func `$`(edge: Edge): string =
   exportIdentifier(edge.a) & " -- " & exportIdentifier(edge.b)
